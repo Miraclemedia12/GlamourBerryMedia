@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glamour Elite | Admin Command Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap');
+        
+        body {
+            background-color: #050505;
+            color: #e2e8f0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .glass-card {
+            background: rgba(15, 15, 15, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+        }
+
+        .gold-gradient {
+            background: linear-gradient(135deg, #f5e050 0%, #d4af37 100%);
+        }
+
+        .gold-text {
+            background: linear-gradient(135deg, #f5e050 0%, #d4af37 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        input, select {
+            background: rgba(255, 255, 255, 0.03) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: white !important;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            border-color: #d4af37 !important;
+            box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+            outline: none;
+        }
+
+        .sidebar-link {
+            transition: all 0.3s ease;
+            border-radius: 12px;
+        }
+
+        .sidebar-link:hover, .sidebar-link.active {
+            background: rgba(212, 175, 55, 0.1);
+            color: #d4af37;
+        }
+
+        #loginOverlay {
+            position: fixed; inset: 0;
+            background: #000;
+            z-index: 9999;
+            display: flex; align-items: center; justify-content: center;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex">
+
+    <div id="loginOverlay">
+        <div class="glass-card p-10 w-full max-w-md text-center border-zinc-800">
+            <h1 class="text-2xl font-black italic gold-text mb-2 uppercase">Admin Portal</h1>
+            <p class="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-8">Access restricted to Miracle Media Ent.</p>
+            
+            <div class="space-y-4">
+                <input type="text" id="adminUser" placeholder="Admin Username" class="w-full p-4 rounded-2xl text-center font-bold tracking-tight">
+                <input type="password" id="adminPass" placeholder="Security Password" class="w-full p-4 rounded-2xl text-center font-bold tracking-widest">
+                <button onclick="attemptLogin()" class="gold-gradient w-full py-4 rounded-2xl text-black font-black uppercase text-xs tracking-tighter">Authorize Access</button>
+            </div>
+            <p id="loginError" class="text-red-500 text-[9px] mt-4 font-bold uppercase hidden">Invalid Credentials</p>
+        </div>
+    </div>
+
+    <div class="w-64 border-r border-zinc-900 p-6 hidden md:block">
+        <div class="mb-10">
+            <h1 class="text-xl font-black gold-text italic tracking-tighter">GLAMOUR ADMIN</h1>
+            <p class="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Management Suite</p>
+        </div>
+
+        <nav class="space-y-2">
+            <a href="#" class="sidebar-link active flex items-center gap-3 px-4 py-3 text-sm font-bold">
+                <i class="fas fa-chart-pie"></i> Overview
+            </a>
+            <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-3 text-sm font-bold text-zinc-500">
+                <i class="fas fa-users"></i> User Manager
+            </a>
+            <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-3 text-sm font-bold text-zinc-500">
+                <i class="fas fa-cog"></i> Global Settings
+            </a>
+            <div class="pt-10">
+                <button onclick="logout()" class="flex items-center gap-3 px-4 py-3 text-sm font-bold text-red-500/60 hover:text-red-500 transition-colors">
+                    <i class="fas fa-power-off"></i> Sign Out
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <main class="flex-1 p-6 md:p-10 overflow-y-auto">
+        
+        <header class="flex justify-between items-center mb-10">
+            <div>
+                <h2 class="text-2xl font-bold">System Overview</h2>
+                <p class="text-zinc-500 text-sm">Control regional payment details</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="logout()" class="sm:hidden text-zinc-500 px-4"><i class="fas fa-power-off"></i></button>
+                <div class="text-right hidden sm:block">
+                    <p class="text-xs font-bold text-white">Admin Miracle</p>
+                    <p class="text-[10px] text-zinc-500 uppercase">Super User</p>
+                </div>
+                <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center font-bold text-black">M</div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="glass-card p-6">
+                <p class="text-zinc-500 text-xs font-bold uppercase mb-2">Total Revenue</p>
+                <h3 class="text-3xl font-black gold-text" id="statRevenue">₦0.00</h3>
+            </div>
+            <div class="glass-card p-6">
+                <p class="text-zinc-500 text-xs font-bold uppercase mb-2">Active Users</p>
+                <h3 class="text-3xl font-black text-white" id="statUsers">0</h3>
+            </div>
+            <div class="glass-card p-6">
+                <p class="text-zinc-500 text-xs font-bold uppercase mb-2">Pending Verify</p>
+                <h3 class="text-3xl font-black text-amber-500" id="statPending">0</h3>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <div class="glass-card p-8">
+                <div class="flex items-center justify-between mb-8">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-university gold-text"></i>
+                        <h3 class="text-lg font-bold">Regional Payments</h3>
+                    </div>
+                    <select id="countrySelect" class="bg-zinc-900 text-[10px] font-black uppercase px-3 py-2 rounded-lg border border-zinc-800">
+                        <option value="ng">Nigeria (NGN)</option>
+                        <option value="gh">Ghana (GHS)</option>
+                        <option value="cm">Cameroon (XAF)</option>
+                        <option value="ug">Uganda (UGX)</option>
+                        <option value="sa">South Africa (ZAR)</option>
+                        <option value="ke">Kenya (KES)</option>
+                    </select>
+                </div>
+                
+                <form id="settingsForm" class="space-y-6">
+                    <div>
+                        <label class="text-[10px] font-bold text-zinc-500 uppercase block mb-2">Telegram Admin Handle</label>
+                        <input type="text" id="setTg" class="w-full p-4 rounded-xl text-sm" placeholder="e.g. GLAMOUROFFICIAL_2">
+                    </div>
+
+                    <div class="border-t border-zinc-900 pt-6">
+                        <p id="editingLabel" class="text-[10px] font-black gold-text uppercase mb-4 tracking-widest italic">Editing: Nigeria Details</p>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="col-span-2 sm:col-span-1">
+                                <label class="text-[10px] font-bold text-zinc-500 uppercase block mb-2">Bank/Method Name</label>
+                                <input type="text" id="setBank" class="w-full p-4 rounded-xl text-sm">
+                            </div>
+                            <div class="col-span-2 sm:col-span-1">
+                                <label class="text-[10px] font-bold text-zinc-500 uppercase block mb-2">Account/Momo No</label>
+                                <input type="text" id="setAcc" class="w-full p-4 rounded-xl text-sm">
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <label class="text-[10px] font-bold text-zinc-500 uppercase block mb-2">Account Holder Name</label>
+                            <input type="text" id="setName" class="w-full p-4 rounded-xl text-sm">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full gold-gradient py-4 rounded-xl text-black font-black text-xs uppercase tracking-widest shadow-lg active:scale-95 transition-transform">
+                        Update Region & Handle
+                    </button>
+                </form>
+            </div>
+
+            <div class="glass-card p-8 overflow-hidden">
+                <div class="flex items-center justify-between mb-8">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-bolt gold-text"></i>
+                        <h3 class="text-lg font-bold">New Registrations</h3>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead>
+                            <tr class="text-zinc-600 border-b border-zinc-900">
+                                <th class="pb-4 font-bold uppercase text-[9px]">User</th>
+                                <th class="pb-4 font-bold uppercase text-[9px]">Country</th>
+                                <th class="pb-4 font-bold uppercase text-[9px]">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAyMQQK0qbw1lpeuPcPmFgSpBoy1yFKFJE",
+            authDomain: "celeste-website.firebaseapp.com",
+            projectId: "celeste-website",
+            storageBucket: "celeste-website.firebasestorage.app",
+            messagingSenderId: "181088900219",
+            appId: "1:181088900219:web:eb1fedd04dc0cf676b7ede"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- AUTH LOGIC ---
+        const VALID_USER = "BerryMedia"; 
+        const VALID_PASS = "BerryGlamour"; 
+
+        window.attemptLogin = () => {
+            const user = document.getElementById('adminUser').value;
+            const pass = document.getElementById('adminPass').value;
+            if(user === VALID_USER && pass === VALID_PASS) {
+                sessionStorage.setItem('admin_auth', 'true');
+                document.getElementById('loginOverlay').style.display = 'none';
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        };
+
+        window.logout = () => {
+            sessionStorage.removeItem('admin_auth');
+            location.reload();
+        };
+
+        if(sessionStorage.getItem('admin_auth') === 'true') {
+            document.getElementById('loginOverlay').style.display = 'none';
+        }
+
+        // --- CORE LOGIC ---
+        const settingsRef = doc(db, 'admin', 'settings');
+        let localData = {};
+
+        onSnapshot(settingsRef, (snap) => {
+            if(snap.exists()){
+                localData = snap.data();
+                document.getElementById('setTg').value = localData.tgLink || "";
+                updateFormFields();
+            }
+        });
+
+        const countrySelect = document.getElementById('countrySelect');
+        function updateFormFields() {
+            const country = countrySelect.value;
+            document.getElementById('editingLabel').innerText = `Editing: ${country.toUpperCase()} Details`;
+            document.getElementById('setBank').value = localData[`${country}Bank`] || "";
+            document.getElementById('setAcc').value = localData[`${country}Acc`] || "";
+            document.getElementById('setName').value = localData[`${country}Name`] || "";
+        }
+        countrySelect.addEventListener('change', updateFormFields);
+
+        document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const country = countrySelect.value;
+            const updateObj = {
+                tgLink: document.getElementById('setTg').value,
+                [`${country}Bank`]: document.getElementById('setBank').value,
+                [`${country}Acc`]: document.getElementById('setAcc').value,
+                [`${country}Name`]: document.getElementById('setName').value
+            };
+            try { await setDoc(settingsRef, updateObj, { merge: true }); alert("Live System Updated!"); }
+            catch (err) { alert("Update Failed"); }
+        });
+
+        // Stats
+        onSnapshot(collection(db, 'users'), (snapshot) => {
+            document.getElementById('statUsers').innerText = snapshot.size;
+            let pending = 0, rev = 0, tableHTML = "";
+            snapshot.forEach((doc) => {
+                const u = doc.data();
+                if(u.status === "Pending") pending++;
+                rev += (u.activationPaid || 0);
+                tableHTML += `<tr class="border-b border-zinc-900/50"><td class="py-4"><p class="font-bold">@${doc.id}</p></td><td class="py-4 text-xs font-medium text-zinc-400">${u.country || 'NG'}</td><td class="py-4"><span class="px-2 py-1 rounded text-[8px] font-black uppercase ${u.status === 'Active' ? 'bg-green-500/10 text-green-500' : 'bg-amber-500/10 text-amber-500'}">${u.status || 'Pending'}</span></td></tr>`;
+            });
+            document.getElementById('statPending').innerText = pending;
+            document.getElementById('statRevenue').innerText = "₦" + rev.toLocaleString();
+            document.getElementById('userTable').innerHTML = tableHTML;
+        });
+    </script>
+</body>
+</html>
