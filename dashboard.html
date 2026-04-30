@@ -115,7 +115,7 @@
         </div>
         <div class="bg-zinc-900/50 border border-zinc-800 px-4 py-2 rounded-full flex items-center gap-2">
             <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span class="text-[10px] font-black text-zinc-300 uppercase tracking-tighter" id="countryDisplay">...</span>
+            <span class="text-[10px] font-black text-zinc-300 uppercase tracking-tighter" id="topUserDisplay">...</span>
         </div>
     </div>
 
@@ -262,7 +262,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, onSnapshot, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAyMQQK0qbw1lpeuPcPmFgSpBoy1yFKFJE",
@@ -278,6 +278,7 @@
 
         const currentUsername = localStorage.getItem('glamour_username') || "EliteGuest";
         document.getElementById('userDisplay').innerText = "@" + currentUsername;
+        document.getElementById('topUserDisplay').innerText = currentUsername.toUpperCase();
 
         const userDocRef = doc(db, 'users', currentUsername);
 
@@ -303,7 +304,6 @@
             const currentBal = (userData.balance || 0) === 0 ? bonus : userData.balance;
             document.getElementById('mainBalance').innerText = symbol + currentBal.toLocaleString();
             document.getElementById('indirectIncome').innerText = symbol + (userData.indirectEarnings || 0).toLocaleString();
-            document.getElementById('countryDisplay').innerText = country.toUpperCase() + " REGION";
         }
 
         window.showProceed = (title) => {
@@ -318,20 +318,16 @@
         };
         window.closeActivation = () => document.getElementById('activationPopup').style.display = 'none';
 
-        // REDIRECT LOGIC
         window.goToPayment = async () => {
             const selectedCountry = document.getElementById('activationCountry').value;
             try {
-                // Update the user's country in Firebase before moving to payment
                 await updateDoc(userDocRef, { country: selectedCountry });
                 window.location.href = "payment.html";
             } catch (err) {
-                // If update fails, still redirect
                 window.location.href = "payment.html";
             }
         };
 
-        // --- TIMER LOGIC ---
         function startTimer(duration) {
             let timer = duration, minutes, seconds;
             const display = document.getElementById('expiryBadge');
