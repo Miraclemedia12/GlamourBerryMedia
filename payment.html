@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Secure Activation | Glamour Elite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap');
+        
+        body { 
+            background-color: #050505; 
+            color: #ffffff; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+        }
+
+        .gold-gradient {
+            background: linear-gradient(135deg, #f5e050 0%, #d4af37 100%);
+        }
+
+        .gold-text {
+            background: linear-gradient(135deg, #f5e050 0%, #d4af37 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .payment-card {
+            background: #0f0f0f;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 35px;
+        }
+
+        .copy-btn:active { transform: scale(0.9); }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen px-6">
+
+    <div class="w-full max-w-md">
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-black italic gold-text uppercase">Secure Payment</h1>
+            <p class="text-zinc-500 text-[10px] font-bold uppercase tracking-[0.2em] mt-2">Elite Membership Activation</p>
+        </div>
+
+        <div class="payment-card p-8 shadow-2xl relative overflow-hidden">
+            <div class="flex justify-center mb-8">
+                <div class="bg-red-500/10 border border-red-500/20 px-4 py-2 rounded-full flex items-center gap-2">
+                    <i class="fas fa-clock text-red-500 text-xs"></i>
+                    <span id="timer" class="text-red-500 font-black text-xs uppercase tracking-tighter">10:00</span>
+                </div>
+            </div>
+
+            <div id="loading" class="text-center py-10">
+                <i class="fas fa-circle-notch fa-spin gold-text text-3xl"></i>
+                <p class="text-zinc-500 text-[10px] font-bold uppercase mt-4">Fetching Secure Details...</p>
+            </div>
+
+            <div id="paymentDetails" class="hidden">
+                <div class="space-y-6">
+                    <div class="text-center pb-6 border-b border-zinc-900">
+                        <p class="text-[9px] font-bold text-zinc-600 uppercase mb-1">Pay Exactly</p>
+                        <h2 class="text-4xl font-black text-white italic" id="displayAmount">---</h2>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-[9px] font-bold text-zinc-600 uppercase mb-2">Transfer To</p>
+                            <div class="bg-black/50 p-4 rounded-2xl border border-zinc-900">
+                                <div class="flex justify-between items-center mb-4">
+                                    <span class="text-[10px] text-zinc-500 font-bold uppercase">Bank Name</span>
+                                    <span id="displayBank" class="text-xs font-black text-white uppercase tracking-tight">---</span>
+                                </div>
+                                
+                                <div class="flex justify-between items-center mb-4">
+                                    <span class="text-[10px] text-zinc-500 font-bold uppercase">Account Number</span>
+                                    <div class="flex items-center gap-3">
+                                        <span id="displayAcc" class="text-lg font-black gold-text italic tracking-tighter">---</span>
+                                        <button onclick="copyAcc()" class="copy-btn text-zinc-700 hover:text-white transition-colors">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-between items-center">
+                                    <span class="text-[10px] text-zinc-500 font-bold uppercase">Account Name</span>
+                                    <span id="displayName" class="text-[10px] font-black text-white uppercase text-right leading-tight max-w-[150px]">---</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-4">
+                        <button onclick="verifyPayment()" class="gold-gradient w-full py-5 rounded-2xl text-[11px] text-black font-black uppercase tracking-widest shadow-xl active:scale-95 transition-transform">
+                            I Have Made The Transfer
+                        </button>
+                        <p class="text-[8px] text-zinc-600 font-bold uppercase text-center mt-6 leading-relaxed">
+                            <i class="fas fa-shield-alt mr-1"></i> Payments are processed instantly via secure agent nodes
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="window.history.back()" class="text-[10px] font-black text-zinc-700 hover:text-zinc-400 uppercase tracking-widest mt-8 block w-full text-center">
+            Cancel Transaction
+        </button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAyMQQK0qbw1lpeuPcPmFgSpBoy1yFKFJE",
+            authDomain: "celeste-website.firebaseapp.com",
+            projectId: "celeste-website",
+            storageBucket: "celeste-website.firebasestorage.app",
+            messagingSenderId: "181088900219",
+            appId: "1:181088900219:web:eb1fedd04dc0cf676b7ede"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const currentUsername = localStorage.getItem('glamour_username') || "EliteGuest";
+
+        let liveSettings = {};
+
+        async function initPayment() {
+            const adminDoc = await getDoc(doc(db, 'admin', 'settings'));
+            if (adminDoc.exists()) liveSettings = adminDoc.data();
+
+            const userDoc = await getDoc(doc(db, 'users', currentUsername));
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                renderDetails(userData.country || "Nigeria");
+            }
+        }
+
+        function renderDetails(country) {
+            let details = { amount: "", bank: "", acc: "", name: "" };
+
+            // Default fallback settings (if Firebase admin is empty)
+            const defaults = {
+                Nigeria: { fee: "₦15,000", bank: "KUDA", acc: "93003738174", name: "BERRY MEDIA ENTERPRISE III" },
+                Ghana: { fee: "250 GHS", bank: "MTN MOMO", acc: "XXXXXXXXXX", name: "AGENT NAME" },
+                Cameroon: { fee: "14,000 XAF", bank: "MTN MOBILE", acc: "XXXXXXXXXX", name: "AGENT NAME" },
+                Uganda: { fee: "70,000 UGX", bank: "AIRTEL/MTN", acc: "XXXXXXXXXX", name: "AGENT NAME" },
+                "South Africa": { fee: "R380", bank: "CAPITEC", acc: "XXXXXXXXXX", name: "AGENT NAME" },
+                Kenya: { fee: "2,800 KES", bank: "M-PESA", acc: "XXXXXXXXXX", name: "AGENT NAME" }
+            };
+
+            const data = defaults[country] || defaults["Nigeria"];
+
+            // Prioritize liveSettings from Firebase if they exist
+            document.getElementById('displayAmount').innerText = data.fee;
+            document.getElementById('displayBank').innerText = liveSettings[`${getPrefix(country)}Bank`] || data.bank;
+            document.getElementById('displayAcc').innerText = liveSettings[`${getPrefix(country)}Acc`] || data.acc;
+            document.getElementById('displayName').innerText = liveSettings[`${getPrefix(country)}Name`] || data.name;
+
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('paymentDetails').classList.remove('hidden');
+            startTimer(600); // 10 Minutes
+        }
+
+        function getPrefix(country) {
+            const map = { "Nigeria": "ng", "Ghana": "gh", "Cameroon": "cm", "Uganda": "ug", "South Africa": "sa", "Kenya": "ke" };
+            return map[country] || "ng";
+        }
+
+        window.copyAcc = () => {
+            const accNum = document.getElementById('displayAcc').innerText;
+            navigator.clipboard.writeText(accNum);
+            alert("Account Number Copied!");
+        };
+
+        window.verifyPayment = () => {
+            const tgLink = liveSettings.tgLink || "GLAMOUROFFICIAL_2";
+            const handle = tgLink.replace('@', '');
+            const msg = `Hello Admin, I have just made payment for my activation.\n\nUsername: @${currentUsername}`;
+            window.open(`https://t.me/${handle}?text=${encodeURIComponent(msg)}`);
+        };
+
+        function startTimer(duration) {
+            let timer = duration, minutes, seconds;
+            const display = document.getElementById('timer');
+            const countdown = setInterval(() => {
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+                display.textContent = minutes + ":" + seconds;
+                if (--timer < 0) {
+                    clearInterval(countdown);
+                    display.textContent = "EXPIRED";
+                    alert("Payment window expired. Please refresh.");
+                }
+            }, 1000);
+        }
+
+        initPayment();
+    </script>
+</body>
+</html>
